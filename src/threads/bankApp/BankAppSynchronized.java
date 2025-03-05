@@ -1,4 +1,4 @@
-package threads.bankApp2;
+package threads.bankApp;
 // BankApp2 - Liveprogramming.
 // Demo af klasser, objekter, constructor, toString, ArrayList,LocalDate
 // Demo af static
@@ -7,17 +7,29 @@ package threads.bankApp2;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-public class BankApp2 {
-	public static void main(String[] args) {
+public class BankAppSynchronized {
+	public static void main(String[] args) throws InterruptedException {
 		Account a1=new Account("Joe Pass", 1.5);
-		Account a2=new Account("Jimmy Hendrix", 1.5);
-		System.out.println(a1);
-		System.out.println(a2);
-		a1.deposit(100);
-		a1.deposit(50);
-		a1.withdraw(25);
+		Customer tom=new Customer(a1);
+		Customer jerry=new Customer(a1);
+		tom.start();
+		jerry.start();
+
+		tom.join();
+		jerry.join();
 		a1.printTransactions();
-		a2.printTransactions();
+	}
+}
+
+class Customer extends Thread {
+	Account account;
+	Customer(Account account){
+		this.account=account;
+	}
+	public void run(){
+		account.deposit(1000);
+		account.withdraw(10);
+		account.deposit(1000);
 	}
 }
 
@@ -44,12 +56,12 @@ class Account {
 		balance=0;
 	}
 
-	void deposit(double amount) {
+	synchronized void deposit(double amount) {
 		balance=balance+amount;
 		transactions.add(new Transaction("Indsat", amount, balance) );
 	}
 
-	void withdraw(double amount) {
+	synchronized void withdraw(double amount) {
 		balance=balance-amount;
 		transactions.add(new Transaction("Hævet", -amount, balance) );
 	}
